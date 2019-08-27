@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { ipcMain, webContents } from 'electron';
 
 export default function replayActionMain(store) {
   /**
@@ -12,5 +12,12 @@ export default function replayActionMain(store) {
 
   ipcMain.on('redux-action', (event, payload) => {
     store.dispatch(payload);
+
+    const allWebContents = webContents.getAllWebContents();
+    allWebContents.forEach(webContents => {
+      if (event.sender.id !== webContents.id) {
+        window.webContents.send('redux-action', payload);
+      }
+    });
   });
 }
